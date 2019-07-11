@@ -255,7 +255,7 @@ def parse_anno(options, format='gff'):
 
 def main():
 
-    options = parse_ options(sys.argv)
+    options = parse_options(sys.argv)
     options.verbose = True
 
     options.anno_hdf5 = options.anno

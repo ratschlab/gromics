@@ -33,6 +33,9 @@ setup(
         'console_scripts': [
             'count_expression=ratschlab_omicstools.counting.count_expression:main',
             'count_expression_prep_anno=ratschlab_omicstools.counting.count_expression_prep_anno:main',
+            'splice_burden_project=ratschlab_omicstools.splice_burden.splice_burden_project:main',
+            'splice_burden_compute=ratschlab_omicstools.splice_burden.splice_burden_compute:main',
+            'splice_burden_plot_tcga=ratschlab_omicstools.splice_burden.splice_burden_plot_tcga:main',
         ],
     },
     install_requires=requirements,

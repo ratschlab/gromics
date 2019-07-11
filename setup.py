@@ -23,8 +23,6 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
-        "Programming Language :: Python :: 2",
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
@@ -33,7 +31,8 @@ setup(
     description="This project contains genomics scripts and utilities used in the Ratschlab",
     entry_points={
         'console_scripts': [
-            'silly_sum=ratschlab_omicstools.silly_sum:main',
+            'count_expression=ratschlab_omicstools.counting.count_expression:main',
+            'count_expression_prep_anno=ratschlab_omicstools.counting.count_expression_prep_anno:main',
         ],
     },
     install_requires=requirements,

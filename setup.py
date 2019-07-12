@@ -38,6 +38,10 @@ setup(
             'splice_burden_plot_tcga=gromics.splice_burden.splice_burden_plot_tcga:main',
         ],
     },
+    scripts=[
+        'scripts/difftest/deseq2.R',
+        'scripts/difftest/Limma.R',
+    ],
     install_requires=requirements,
     license="MIT license",
     long_description=readme,

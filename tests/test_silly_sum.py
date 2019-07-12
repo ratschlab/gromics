@@ -1,5 +1,5 @@
 import pytest
-import ratschlab_omicstools.silly_sum as silly_sum
+import gromics.silly_sum as silly_sum
 import pandas as pd
 import numpy as np
 import os

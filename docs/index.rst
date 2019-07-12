@@ -1,4 +1,4 @@
-Welcome to ratschlab_omicstools's documentation!
+Welcome to gromics's documentation!
 ======================================
 
 .. toctree::

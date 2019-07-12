@@ -2,6 +2,6 @@
 Usage
 =====
 
-To use ratschlab_omicstools in a project::
+To use gromics in a project::
 
-    import ratschlab_omicstools
+    import gromics

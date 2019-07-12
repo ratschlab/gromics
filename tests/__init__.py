@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 
-"""Test package for ratschlab_omicstools."""
+"""Test package for gromics."""

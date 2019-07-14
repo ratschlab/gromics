@@ -35,6 +35,7 @@ setup(
             'count_expression_prep_anno=gromics.counting.count_expression_prep_anno:main',
             'compute_lib_size=gromics.counting.compute_lib_size:main',
             'collect_counts=gromics.counting.collect_counts:main',
+            'count_hdf2tsv=gromics.counting.count_hdf2tsv:main',
             'splice_burden_project=gromics.splice_burden.splice_burden_project:main',
             'splice_burden_compute=gromics.splice_burden.splice_burden_compute:main',
             'splice_burden_plot_tcga=gromics.splice_burden.splice_burden_plot_tcga:main',

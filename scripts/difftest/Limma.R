@@ -15,7 +15,7 @@ countsData        = read.table(args[1],header=TRUE, row.names="gene_id", check.n
 colData           = read.table(args[2], header=TRUE, row.names="sample", check.names=FALSE)
 
 # Get output files
-output_diff_counts   = args[3]#snakemake@output$diff_counts
+output_diff_counts   = args[3]
 
 #write(date(),file=output_log)
 # Load counts data

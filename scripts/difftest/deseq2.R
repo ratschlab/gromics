@@ -1,18 +1,11 @@
 #!/usr/bin/env Rscript
 
-#log <- file(snakemake@log[[1]], open="wt")
-#sink(log)
-#sink(log, type="message")
+# force usage of conda R environment
+# according to: https://github.com/conda-forge/r-rjags-feedstock/issues/6#issuecomment-504938719
+.libPaths(R.home("library"))
 
 library("DESeq2")
 
-#parallel <- FALSE
-#if (snakemake@threads > 1) {
-    #library("BiocParallel")
-    # setup parallelization
-    #register(MulticoreParam(snakemake@threads))
-    #parallel <- TRUE
-#}
 args = commandArgs(trailingOnly=TRUE)
 
 ## Defining the code for DESEQ2 DE expression

@@ -19,6 +19,7 @@ def parse_options(argv):
     required.add_option('-o', '--outfile', dest='outfile', metavar='FILE', help='outfile to store counts in tab delimited format [stdin]', default='-')
     required.add_option('-A', '--alignment', dest='alignment', metavar='FILE', help='alignment in sam or bam format [stdin - sam]', default='-')
     optional = OptionGroup(parser, 'OPTIONAL')
+    optional.add_option('-H', '--header', dest='header', metavar='STRING', help='header to be used for file in output, default is filename (without extension) [filename]', default='-')
     optional.add_option('-F', '--fields', dest='fields', metavar='STRING', help='annotation fields [exon], comma separated', default='exon')
     optional.add_option('-f', '--filters', dest='filters', metavar='STRING', help='file containing filter maps in hdf5 [-]', default='-')
     optional.add_option('-n', '--filternames', dest='filternames', metavar='STRING', help='list of filter names to use, comma separated, names must be present in t filter hdf5 [names in hdf5 in lex order]', default='-')
@@ -359,6 +360,12 @@ def main():
             outfile = open(options.outfile + comb_tag, 'w')
             a = 0
             g = 0
+            ### writing header
+            if options.header == '-':
+                print('\t'.join(['gene_id', fname.rsplit('.', 1)[0]]), file=outfile)
+            else:
+                print('\t'.join(['gene_id', options.header]), file=outfile)
+
             ### seek to first position that mapped to gene (0 means not gene found)
             while g < len(genes):
                 while g < len(genes) and (a == len(compressed_counts[idx]) or genes[g] < compressed_counts[idx][a][0]):

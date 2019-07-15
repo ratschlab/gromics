@@ -13,7 +13,7 @@ def parse_options(argv):
 
     from argparse import ArgumentParser
 
-    parser = ArgumentParser(prog='compute_lib_size',
+    parser = ArgumentParser(prog='count_hdf2tsv',
                             description='This script takes an aggregated expression count file in hdf5 format and converts it into tsv.')
     parser.add_argument('-i', '--infile', dest='infile', metavar='STR', help='input file name', required=True)
     parser.add_argument('-o', '--outfile', dest='outfile', metavar='STR', help='output file name', required=True)

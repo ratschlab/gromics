@@ -56,8 +56,6 @@ def main():
         #sid = re.sub(r'.tsv$', '', fname.split('/')[-1])
         assert data[0, 0] == 'gene_id', 'ERROR: data has no header!'
         sid = data[0, 1]
-        import pdb
-        pdb.set_trace()
 
         if f == 0:
             OUT.create_dataset('sids', data=sp.array([sid]).view(sp.chararray).encode('utf-8'), dtype='|S128', chunks=True, compression='gzip', maxshape=(None,))

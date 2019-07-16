@@ -11,11 +11,13 @@ args = commandArgs(trailingOnly=TRUE)
 ## Defining the code for DESEQ2 DE expression
 data        = read.table(args[1], header=TRUE, row.names="gene_id", check.names=FALSE)
 design      = read.table(args[2], header=TRUE, row.names="sample", check.names=FALSE)
-#outdir     = paste(as.character(args[3]), "/", sep='')
 control     = args[3]
 disease     = args[4]
-
 output_diff_counts   = args[5]
+
+### sort data and design matrix
+design <- design[order(row.names(design)), , drop=FALSE]
+data <- data[ , order(names(data)), drop=FALSE]
 
 ## remove genes with 0 count
 nullGenes   <- rownames(data[rowSums(data)==0,])

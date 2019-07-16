@@ -7,13 +7,11 @@
 library(limma)
 library(edgeR)
 
-
 args <- commandArgs(TRUE)
 
 # Get parameters for the test
 countsData        = read.table(args[1],header=TRUE, row.names="gene_id", check.names=FALSE)
 colData           = read.table(args[2], header=TRUE, row.names="sample", check.names=FALSE)
-
 # Get output files
 output_diff_counts   = args[3]
 

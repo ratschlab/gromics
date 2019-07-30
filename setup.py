@@ -44,6 +44,7 @@ setup(
     scripts=[
         'scripts/difftest/deseq2.R',
         'scripts/difftest/Limma.R',
+        'scripts/hypoxia/tupro_pipeline_hypoxia.R',
     ],
     install_requires=requirements,
     license="MIT license",

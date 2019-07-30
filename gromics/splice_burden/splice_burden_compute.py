@@ -19,7 +19,7 @@ import re
 import gzip
 import pickle
 
-from ratschlab_omicstools.viz.distribution import violin_plot
+from gromics.viz.distribution import violin_plot
 
 from spladder.classes import gene as cgene
 from spladder.classes import splicegraph as csplicegraph

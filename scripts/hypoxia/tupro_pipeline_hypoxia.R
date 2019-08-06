@@ -4,6 +4,7 @@
 # according to: https://github.com/conda-forge/r-rjags-feedstock/issues/6#issuecomment-504938719
 .libPaths(R.home("library"))
 
+library("data.table")
 library("ssPATHS")
 
 ################## base formating functions ######################

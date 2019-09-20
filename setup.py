@@ -45,6 +45,7 @@ setup(
         'scripts/difftest/deseq2.R',
         'scripts/difftest/Limma.R',
         'scripts/hypoxia/tupro_pipeline_hypoxia.R',
+        'scripts/tcga_boxplot/variant_expression_context.TCGA.list_of_genes.R'
     ],
     install_requires=requirements,
     license="MIT license",

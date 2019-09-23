@@ -39,6 +39,7 @@ setup(
             'splice_burden_project=gromics.splice_burden.splice_burden_project:main',
             'splice_burden_compute=gromics.splice_burden.splice_burden_compute:main',
             'splice_burden_plot_tcga=gromics.splice_burden.splice_burden_plot_tcga:main',
+            'filter_genes=gromics.tcga_boxplot:main'
         ],
     },
     scripts=[

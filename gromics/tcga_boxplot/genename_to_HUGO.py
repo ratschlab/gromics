@@ -2,6 +2,8 @@
 import sys
 
 """
+Usage: python genename_to_HUGO.py <resources/tcga_boxplot/genes_of_interest.txt> <{sample}.genes.results.normalized.header.txt> <{sample}.genes.results.normalized.genes_filtered.txt> 
+
 Purpose: Changes the ENSEMBL geneID to HUGO symbol.
     Usage scenario: This script is used in RNASeq snakemake pipeline. The 'rule filter_genes' in rules/tcga_boxplot.smk uses this script
     Usage example:   genename_to_HUGO.py <genes_of_interest.txt> <OB225.genes.results.normalized.header.txt>  > OB225.genes.results.normalized.genes_filtered.txt
@@ -10,7 +12,6 @@ Purpose: Changes the ENSEMBL geneID to HUGO symbol.
     ---------------------       -----------------------------------------       -------------------------------------------------
     AKT1,ENSG00000142208        gene_id OB225                                   gene_id OB225
                                 ENSG00000142208.11      1067.7043               AKT1    1067.7043
-
 Author: Tinu Thomas
 Date: July, 2019
 """

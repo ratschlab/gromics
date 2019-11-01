@@ -1,13 +1,18 @@
---quartile_norm.pl
-The gene expression/quantification data files given out by the `rsem_calculate_expression` is normalized using the script `quartile_norm.pl` downloaded from the https://webshare.bioinf.unc.edu/public/mRNAseq_TCGA 
+--normalize_gene_expression.pl
+    The gene expression/quantification data files given out by the `rsem_calculate_expression` is normalized using the script `quartile_norm.pl` downloaded from the https://webshare.bioinf.unc.edu/public/mRNAseq_TCGA 
 
 --genename_to_HUGO.py
-Usage:   genename_to_HUGO.py <resources/tcga_boxplot/genes_of_interest.txt> <{sample}.genes.results.normalized.header.txt>  > {sample}.genes.results.normalized.genes_filtered.txt 
-Purpose: Changes the ENSEMBL geneID in the file {sample}.genes.results.normalized.header.txt to HUGO symbol.
-usage case example: This script is used in RNASeq snakemake pipeline. The 'rule filter_genes' in rules/tcga_boxplot.smk uses this script
+    Purpose: Changes the ENSEMBL geneID in the file {sample}.genes.results.normalized.header.txt to HUGO symbol.
+    Usage scenario: This script is used in RNASeq snakemake pipeline. The 'rule filter_genes' in rules/tcga_boxplot.smk uses this script
+    Usage example:   genename_to_HUGO.py <genes_of_interest.txt> <OB225.genes.results.normalized.header.txt>  > OB225.genes.results.normalized.genes_filtered.txt 
+    ---------------------       -----------------------------------------       -------------------------------------------------
+    genes_of_interest.txt   |   OB225.genes.results.normalized.header.txt   |   OB225.genes.results.normalized.genes_filtered.txt 
+    ---------------------       -----------------------------------------       -------------------------------------------------
+    AKT1,ENSG00000142208        gene_id OB225                                   gene_id OB225
+                                ENSG00000142208.11      1067.7043               AKT1    1067.7043
 
 --parse_rna_tcga_pat_data.r
- Command line script for generating individual expression context figures from NEXUS
+    Command line script for generating individual expression context figures from NEXUS
 
---variant_expression_context.TCGA.list_of_genes.R
-Command line script for generating individual expression context figures from NEXUS
+--variant_expression_context.TCGA.list_of_genes.R   
+    Command line script for generating individual expression context figures from NEXUS

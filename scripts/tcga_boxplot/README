@@ -1,0 +1,13 @@
+--quartile_norm.pl
+The gene expression/quantification data files given out by the `rsem_calculate_expression` is normalized using the script `quartile_norm.pl` downloaded from the https://webshare.bioinf.unc.edu/public/mRNAseq_TCGA 
+
+--genename_to_HUGO.py
+Usage:   genename_to_HUGO.py <resources/tcga_boxplot/genes_of_interest.txt> <{sample}.genes.results.normalized.header.txt>  > {sample}.genes.results.normalized.genes_filtered.txt 
+Purpose: Changes the ENSEMBL geneID in the file {sample}.genes.results.normalized.header.txt to HUGO symbol.
+usage case example: This script is used in RNASeq snakemake pipeline. The 'rule filter_genes' in rules/tcga_boxplot.smk uses this script
+
+--parse_rna_tcga_pat_data.r
+ Command line script for generating individual expression context figures from NEXUS
+
+--variant_expression_context.TCGA.list_of_genes.R
+Command line script for generating individual expression context figures from NEXUS

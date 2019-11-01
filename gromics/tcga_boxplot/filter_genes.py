@@ -2,16 +2,10 @@
 import sys
 
 """
-Usage: python genename_to_HUGO.py <resources/tcga_boxplot/genes_of_interest.txt> <{sample}.genes.results.normalized.header.txt> <{sample}.genes.results.normalized.genes_filtered.txt> 
-
-Purpose: Changes the ENSEMBL geneID to HUGO symbol.
-    Usage scenario: This script is used in RNASeq snakemake pipeline. The 'rule filter_genes' in rules/tcga_boxplot.smk uses this script
-    Usage example:   genename_to_HUGO.py <genes_of_interest.txt> <OB225.genes.results.normalized.header.txt>  > OB225.genes.results.normalized.genes_filtered.txt
-    ---------------------       -----------------------------------------       -------------------------------------------------
-    genes_of_interest.txt   |   OB225.genes.results.normalized.header.txt   |   OB225.genes.results.normalized.genes_filtered.txt
-    ---------------------       -----------------------------------------       -------------------------------------------------
-    AKT1,ENSG00000142208        gene_id OB225                                   gene_id OB225
-                                ENSG00000142208.11      1067.7043               AKT1    1067.7043
+Usage: python filter_genes.py <resources/tcga_boxplot/genes_of_interest.txt> <{sample}.genes.results.normalized.header.txt> <{sample}.genes.results.normalized.genes_filtered.txt> 
+Purpose: Changes the ENSEMBL geneID in the file {sample}.genes.results.normalized.header.txt to HUGO symbol.
+The resources/tcga_boxplot/genes_of_interest.txt has the 'HUGO_symbol->ENSEMBL_ID' for our genes of interest
+The 'rule filter_genes' in rules/tcga_boxplot.smk in the RNASeq snakemake pipeline uses this script
 Author: Tinu Thomas
 Date: July, 2019
 """

@@ -33,7 +33,6 @@ gene_table <- read.table(args[4], sep = "\t", header = T)
 gene_list <- gene_table[[1]]
 samplename <- args[5]
 
-###   gene_symbol <- args[4]
 
 ## load reference data
 TCGA <- read.table(args[2], header=T, row.names=1)
@@ -43,9 +42,6 @@ for (gene_symbol in gene_list){
 	## get full gene name
 	gene <- rownames(TCGA)[grep(paste0("^", gene_symbol, "\\|"), rownames(TCGA))]
     name<-(strsplit(gene, split="\\|")[[1]][1])
-    #print(gene)
-    #print(name)
-    #print("----")
 	
     ## get relevant data
 	cohort = t(TCGA[gene,])
@@ -57,8 +53,6 @@ for (gene_symbol in gene_list){
 
 	## assign shape and color to patient expression level of gene
 	## green/round 25-75%, orange/square inside whiskers, red/triangle outside whiskers
-	#pat <- sample[gene,1]
-	#pat.location <- max(0, which(pat >=stats))
 	pat.location <- max(0, which(pat>=stats[-3]))+1
 	tab.key <- data.frame(
 	  location=1:5, 

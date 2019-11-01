@@ -34,15 +34,11 @@ for (i in 1:length(sample[,1])){
 	## Read in the current gene, the patients value and the cohort values.
     gene<-sample[i,1]
 	name<-(strsplit(gene, split="\\|")[[1]][1])
-	#name<-(gene)
 	pat<- c(sample[i,2])
 	cohort <- t(TCGA[name,])
 	## Calculate the percentile corresponding to the patient values.
 	quant <- quantile(cohort,probs = seq(0, 1, by= 0.01), na.rm=TRUE)
 	percentile<- max(1, which(pat >=quant))-1
-    #if (pat==0 & all(quant==0)){percentile <- "NA"}
-	#if (pat==0 & quant[1]>0){percentile <- "1"}
-	#if (pat>0 & all(quant==0)){percentile <- "100"}	
 	if (is.null(pat) & all(is.null(quant))){percentile <- "NA"}
 	if (is.null(pat) & quant[1]>0){percentile <- "1"}
 	if (!is.null(pat) & all(is.null(quant))){percentile <- "100"}	

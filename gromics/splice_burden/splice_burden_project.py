@@ -50,6 +50,8 @@ def main():
         eidx = edge_index_spladder[e]
 
         ### get index pair of segments
+        if genes[gidx].segmentgraph.segments.size == 0:
+            genes[gidx].segmentgraph = csegmentgraph.Segmentgraph(genes[gidx])
         a,b = sp.unravel_index(eidx, genes[gidx].segmentgraph.seg_edges.shape)
         
         ### get INTRON coordinates

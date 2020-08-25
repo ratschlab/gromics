@@ -18,6 +18,17 @@ remove_period <- function(GeneID_vector){
  return(myInterestingGenes)
 }
 
+convert_df_to_se <- function(in_df, data_col_idx, annot_col_idx, sample_id_col_idx){
+    
+    # we must take the dataframes and converts them to a SummarizedExperiment
+    out_se <- SummarizedExperiment(t(in_df[ , data_col_idx]),
+                                   colData=in_df[ , annot_col_idx])
+    colnames(out_se) <- in_df[,sample_id_col_idx]
+    colData(out_se)$sample_id <- in_df[,sample_id_col_idx]
+    
+    return(out_se)
+    
+}
 
 ################## read in data ######################
 
@@ -38,8 +49,21 @@ read_patient_file <- function(curr_file){
   # now format it so columns are genes, rows are samples
   curr_patient_formatted = data.frame(sample_id=patient_id, t(curr_patient[,patient_id]+1))
   colnames(curr_patient_formatted) = c("sample_id", curr_patient$gene_id)
+  
+  # bug in ssPATHS, currently requires more than one sample, this is a work around
+  if(nrow(curr_patient_formatted) == 1){
+      curr_patient_formatted = rbind(curr_patient_formatted, curr_patient_formatted)
+      curr_patient_formatted$sample_id[2] = "DELETE_THIS_SAMPLE"
+  }
+  
+  # convert it to a SummarizedExperiment
+  data_col_idx = grep("ENSG", colnames(curr_patient_formatted), invert=F)
+  annot_col_idx = grep("ENSG", colnames(curr_patient_formatted), invert=T)
+  sample_id_col_idx = grep("sample_id", colnames(curr_patient_formatted), invert=F)
+  curr_patient_formatted_se = convert_df_to_se(curr_patient_formatted, data_col_idx, annot_col_idx, sample_id_col_idx)
+  
 
-  return(curr_patient_formatted)
+  return(curr_patient_formatted_se)
 
 }
 
@@ -76,8 +100,15 @@ get_tcga_training_data <- function(tcga_expr_file){
   hypoxia_df$Y[tcga_expr_df$is_normal==FALSE] = 1
 
   hypoxia_df = unique(hypoxia_df)
+  
+  # convert to a SummarizedExpriment
+  data_col_idx = grep("ENSG", colnames(hypoxia_df), invert=F)
+  annot_col_idx = grep("ENSG", colnames(hypoxia_df), invert=T)
+  sample_id_col_idx = grep("sample_id", colnames(hypoxia_df), invert=F)
+  hypoxia_se = convert_df_to_se(hypoxia_df, data_col_idx, annot_col_idx, sample_id_col_idx)
+      
 
-  return(hypoxia_df)
+  return(hypoxia_se)
 
 }
 
@@ -87,18 +118,20 @@ get_hypoxia_score <- function(input_file, output_file, tcga_expr_file, cancer_ty
 
     # get patient expression
     patient_expr = read_patient_file(input_file)
-    patient_expr[1,2:length(patient_expr)] = patient_expr[1,2:length(patient_expr)]
 
     # get training data
     tcga_training_data = get_tcga_training_data(tcga_expr_file)
 
     # get the gene weights
-    res = get_gene_weights(tcga_training_data)
+    res = get_gene_weights(tcga_training_data, gene_ids=rownames(tcga_training_data), unidirectional = F)
     gene_weights = res[[1]]
     sample_scores = res[[2]]
 
     # calculate the score
-    new_score_df_calculated = get_new_samp_score(gene_weights, patient_expr)
+    new_score_df_calculated = get_new_samp_score(gene_weights, patient_expr, gene_ids=rownames(patient_expr), run_normalization=TRUE)
+    
+    # delete the excess samples needed to go-around an ssPATHS bug
+    new_score_df_calculated = subset(new_score_df_calculated, sample_id != "DELETE_THIS_SAMPLE")
 
     # format the output
     new_score_df_calculated$cancer_type_match = cancer_type

@@ -10,7 +10,7 @@ import numpy.random as npr
 npr.seed(23)
 
 import intervaltree as it
-import scipy as sp
+import numpy as np
 import scipy.stats as spst
 import pdb
 import h5py
@@ -74,20 +74,20 @@ def main():
     print('loading data for given sample')
     IN_TC = h5py.File(sample_count_file, 'r')
     gids_tcga = IN_TC['gene_ids_edges'][:, 0]
-    gnames_tcga = IN_TC['gene_names'][:].view(sp.chararray).decode('utf-8')
-    gid_names_tcga = sp.array([gnames_tcga[i] for i in gids_tcga], dtype='str') 
-    strains_tcga = IN_TC['strains'][:].view(sp.chararray).decode('utf-8')
+    gnames_tcga = IN_TC['gene_names'][:].view(np.chararray).decode('utf-8')
+    gid_names_tcga = np.array([gnames_tcga[i] for i in gids_tcga], dtype='str') 
+    strains_tcga = IN_TC['strains'][:].view(np.chararray).decode('utf-8')
 
-    lkidx = sp.arange(strains_tcga.shape[0])
+    lkidx = np.arange(strains_tcga.shape[0])
 
     ### load sample event data
     events, features = pickle.load(open(sample_event_file, 'rb'), encoding='latin1')
 
     ### load list of TCGA neojunctions
-    tcnj = sp.loadtxt(tcga_neojunction_file, dtype='str', delimiter='\t')
-    tcnj = sp.array([re.sub(':-:', ':m:', _) for _ in sp.unique(tcnj[:, 2])])
-    tcnj = sp.array([re.sub(r'-', ':', _) for _ in tcnj])
-    tcnj = sp.array([re.sub(':m:', ':-:', _) for _ in tcnj])
+    tcnj = np.loadtxt(tcga_neojunction_file, dtype='str', delimiter='\t', usecols=[2])
+    tcnj = np.array([re.sub(':-:', ':m:', _) for _ in np.unique(tcnj)])
+    tcnj = np.array([re.sub(r'-', ':', _) for _ in tcnj])
+    tcnj = np.array([re.sub(':m:', ':-:', _) for _ in tcnj])
            
     print('loading data for outgroup (GTEx)')
     IN_GT = h5py.File(outgroup_junction_file, 'r')
@@ -95,26 +95,32 @@ def main():
     if not os.path.exists(sf_gt_pickle):
 
         ### get gene intervals
-        s_idx = sp.argsort(gids_tcga, kind='mergesort')
-        _, f_idx = sp.unique(gids_tcga[s_idx], return_index=True)
-        l_idx = sp.r_[f_idx[1:], gids_tcga.shape[0]]
+        s_idx = np.argsort(gids_tcga, kind='mergesort')
+        _, f_idx = np.unique(gids_tcga[s_idx], return_index=True)
+        l_idx = np.r_[f_idx[1:], gids_tcga.shape[0]]
 
         ### compute total edge count for outgroup samples
         print('Computing total edge count for outgroup (GTEx) samples')
         ### get counts
-        genecounts_gtex = sp.zeros((f_idx.shape[0], IN_GT['edges_outgroup'].shape[1]), dtype='int')
+        genecounts_gtex = np.zeros((f_idx.shape[0], IN_GT['edges_outgroup'].shape[1]), dtype='int')
+        batchsize = 10000
+        curr_batch = [0, 0]
         for i in range(f_idx.shape[0]):
             if (i + 1) % 20 == 0:
                 sys.stdout.write('.')
                 if (i + 1) % 1000 == 0:
                     sys.stdout.write('%i/%i\n' % (i + 1, f_idx.shape[0]))
                 sys.stdout.flush()
-            genecounts_gtex[i, :] = sp.sum(IN_GT['edges_outgroup'][f_idx[i]:l_idx[i], :], axis=0)
+            if l_idx[i] > curr_batch[1]:
+                curr_batch = [f_idx[i], max(f_idx[i] + batchsize, l_idx[i])]
+                tmp = IN_GT['edges_outgroup'][curr_batch[0]:curr_batch[1], :]
+            genecounts_gtex[i, :] = np.sum(tmp[f_idx[i] - curr_batch[0]:l_idx[i] - curr_batch[0], :], axis=0)
         print('computing size factors for normalization')
         sf_gtex = spst.scoreatpercentile(genecounts_gtex, 75, axis=0)
-        sf_gtex = sp.median(sf_gtex) / sf_gtex
-        sf_gtex[sp.isnan(sf_gtex) | sp.isinf(sf_gtex)] = 1
+        sf_gtex = np.median(sf_gtex) / sf_gtex
+        sf_gtex[np.isnan(sf_gtex) | np.isinf(sf_gtex)] = 1
         del genecounts_gtex
+        del tmp
 
         ### store results in pickle
         pickle.dump(sf_gtex, open(sf_gt_pickle, 'wb'), -1)
@@ -127,22 +133,22 @@ def main():
         ### compute total edge count for given sample(s)
         print('Computing total edge count for given sample(s)')
         ### get gene intervals
-        s_idx = sp.argsort(gids_tcga, kind='mergesort')
-        _, f_idx = sp.unique(gids_tcga[s_idx], return_index=True)
-        l_idx = sp.r_[f_idx[1:], gids_tcga.shape[0]]
+        s_idx = np.argsort(gids_tcga, kind='mergesort')
+        _, f_idx = np.unique(gids_tcga[s_idx], return_index=True)
+        l_idx = np.r_[f_idx[1:], gids_tcga.shape[0]]
         ### get counts
-        genecounts_tcga = sp.zeros((f_idx.shape[0], lkidx.shape[0]), dtype='int')
+        genecounts_tcga = np.zeros((f_idx.shape[0], lkidx.shape[0]), dtype='int')
         for i in range(f_idx.shape[0]):
             if (i + 1) % 20 == 0:
                 sys.stdout.write('.')
                 if (i + 1) % 1000 == 0:
                     sys.stdout.write('%i/%i\n' % (i + 1, f_idx.shape[0]))
                 sys.stdout.flush()
-            genecounts_tcga[i, :] = sp.sum(IN_TC['edges'][s_idx[f_idx[i]:l_idx[i]], :][:, lkidx], axis=0)
+            genecounts_tcga[i, :] = np.sum(IN_TC['edges'][s_idx[f_idx[i]:l_idx[i]], :][:, lkidx], axis=0)
         print('computing size factors for normalization')
         sf_tcga = spst.scoreatpercentile(genecounts_tcga, 75, axis=0)
-        sf_tcga = sp.median(sf_tcga) / sf_tcga
-        sf_tcga[sp.isnan(sf_tcga) | sp.isinf(sf_tcga)] = 1
+        sf_tcga = np.median(sf_tcga) / sf_tcga
+        sf_tcga[np.isnan(sf_tcga) | np.isinf(sf_tcga)] = 1
         del genecounts_tcga
 
         ### store results in pickle
@@ -162,18 +168,18 @@ def main():
             if i > 0 and i % 10000 == 0:
                 sys.stdout.write('%i/%i\n' % (i, IN_TC['edges'].shape[0]))
             sys.stdout.flush()
-            tmp = sp.mean((IN_GT['edges_outgroup'][i:i+1000, :] * sf_gtex) >= 2, axis=1)
+            tmp = np.mean((IN_GT['edges_outgroup'][i:i+1000, :] * sf_gtex) >= 2, axis=1)
             if i == 0:
-                k_idx = sp.where(tmp < gtex_thresh)[0]
+                k_idx = np.where(tmp < gtex_thresh)[0]
             else:
-                k_idx = sp.r_[k_idx, sp.where(tmp < gtex_thresh)[0] + i]
+                k_idx = np.r_[k_idx, np.where(tmp < gtex_thresh)[0] + i]
         print('Removed %i of %i edges that were common in outgroup (GTEx)' % (IN_TC['edges'].shape[0] - k_idx.shape[0], IN_TC['edges'].shape[0]))
         print('Retaining %i edges' % k_idx.shape[0])
 
         ### get coordinates of all junctions
-        junction_coords = sp.c_[IN_GT['chrms'][:], IN_GT['strand'][:], IN_GT['pos'][:].astype('str')]
-        junction_coords = sp.array([':'.join(x) for x in junction_coords])
-        tcga_neojunction_match = sp.in1d(junction_coords, tcnj)
+        junction_coords = np.c_[IN_GT['chrms'][:], IN_GT['strand'][:], IN_GT['pos'][:].astype('str')]
+        junction_coords = np.array([':'.join(x) for x in junction_coords])
+        tcga_neojunction_match = np.in1d(junction_coords, tcnj)
 
         ### remove edges that are not confirmed with at least conf_count_glob many reads in the current sample(s) and are not present in the TCGA neojunction list
         print('Checking for edges with insufficient support across samples')
@@ -184,30 +190,30 @@ def main():
             sys.stdout.flush()
             tmp = (IN_TC['edges'][i:i+1000, :][:, lkidx] * sf_tcga).sum(axis=1)
             if i == 0:
-                k_idx_ = sp.where((tmp > conf_count_glob) | tcga_neojunction_match[i:i+1000])[0]
+                k_idx_ = np.where((tmp > conf_count_glob) | tcga_neojunction_match[i:i+1000])[0]
             else:
-                k_idx_ = sp.r_[k_idx_, sp.where((tmp > conf_count_glob) | tcga_neojunction_match[i:i+1000])[0] + i]
-        kk_idx = sp.in1d(k_idx, k_idx_)
-        print('Removed %i of %i edges that were not supported with at least %i reads in the sample cohort and are not present in the TCGA neojunction list' % (k_idx.shape[0] - sp.sum(kk_idx), k_idx.shape[0], conf_count_glob))
-        print('Retaining %i edges' % sp.sum(kk_idx))
+                k_idx_ = np.r_[k_idx_, np.where((tmp > conf_count_glob) | tcga_neojunction_match[i:i+1000])[0] + i]
+        kk_idx = np.in1d(k_idx, k_idx_)
+        print('Removed %i of %i edges that were not supported with at least %i reads in the sample cohort and are not present in the TCGA neojunction list' % (k_idx.shape[0] - np.sum(kk_idx), k_idx.shape[0], conf_count_glob))
+        print('Retaining %i edges' % np.sum(kk_idx))
         k_idx = k_idx[kk_idx]
 
         ### remove edges that are annotated
         print('Checking for edges present in the annotation')
         INJA = h5py.File(anno_junctions, 'r')
-        posj = sp.c_[INJA['chrms'][:], INJA['strand'][:], INJA['pos'][:].astype('str')]
-        posj = sp.array([':'.join(x) for x in posj])
+        posj = np.c_[INJA['chrms'][:], INJA['strand'][:], INJA['pos'][:].astype('str')]
+        posj = np.array([':'.join(x) for x in posj])
         INJA.close()
 
-        kk_idx = sp.where(~sp.in1d(junction_coords[k_idx], posj))[0]
+        kk_idx = np.where(~np.in1d(junction_coords[k_idx], posj))[0]
         print('Removed %i of %i edges that were found in the annotation' % (k_idx.shape[0] - kk_idx.shape[0], k_idx.shape[0]))
         print('Retaining %i edges' % kk_idx.shape[0])
         k_idx = k_idx[kk_idx]
 
         ### get gene intervals
-        s_idx = sp.argsort(gids_tcga[k_idx], kind='mergesort')
-        _, f_idx = sp.unique(gids_tcga[k_idx][s_idx], return_index=True)
-        l_idx = sp.r_[f_idx[1:], k_idx.shape[0]]
+        s_idx = np.argsort(gids_tcga[k_idx], kind='mergesort')
+        _, f_idx = np.unique(gids_tcga[k_idx][s_idx], return_index=True)
+        l_idx = np.r_[f_idx[1:], k_idx.shape[0]]
 
         ### process GTEx samples
         print('\ncollecting counts for GTEx')
@@ -219,11 +225,11 @@ def main():
                 if (i + 1) % 500 == 0:
                     sys.stdout.write('%i/%i\n' % (i + 1, f_idx.shape[0]))
                 sys.stdout.flush()
-            counts_gtex.append(sp.sum((IN_GT['edges_outgroup'][sorted(k_idx[s_idx[f_idx[i]:l_idx[i]]]), :] * sf_gtex) >= conf_count, axis=0))
+            counts_gtex.append(np.sum((IN_GT['edges_outgroup'][sorted(k_idx[s_idx[f_idx[i]:l_idx[i]]]), :] * sf_gtex) >= conf_count, axis=0))
 
         ### process TCGA samples
         print('collecting counts for TCGA')
-        junc_used = sp.zeros((k_idx.shape[0], lkidx.shape[0]), dtype='bool')
+        junc_used = np.zeros((k_idx.shape[0], lkidx.shape[0]), dtype='bool')
 
         ### get counts
         for i in range(f_idx.shape[0]):
@@ -233,13 +239,13 @@ def main():
                     sys.stdout.write('%i/%i\n' % (i + 1, f_idx.shape[0]))
                 sys.stdout.flush()
             tmp = IN_TC['edges'][sorted(k_idx[s_idx[f_idx[i]:l_idx[i]]]), :][:, lkidx] * sf_tcga
-            counts_tcga.append(sp.sum(tmp >= conf_count, axis=0))
-            donor_support_tcga.extend(sp.sum(tmp >= conf_count, axis=1))
+            counts_tcga.append(np.sum(tmp >= conf_count, axis=0))
+            donor_support_tcga.extend(np.sum(tmp >= conf_count, axis=1))
             junc_used[s_idx[f_idx[i]:l_idx[i]], :] = (tmp >= conf_count)
 
-        counts_tcga = sp.array(counts_tcga, dtype='int').T
-        counts_gtex = sp.array(counts_gtex, dtype='int').T
-        donor_support_tcga = sp.array(donor_support_tcga, dtype='int')
+        counts_tcga = np.array(counts_tcga, dtype='int').T
+        counts_gtex = np.array(counts_gtex, dtype='int').T
+        donor_support_tcga = np.array(donor_support_tcga, dtype='int')
 
         pickle.dump((counts_tcga, counts_gtex, donor_support_tcga, k_idx), open(compl_pickle, 'wb'), -1)
         JU = h5py.File(compl_pickle_junc, 'w')
@@ -256,12 +262,12 @@ def main():
 
     ### write junctions to file
     jt_pos = IN_GT['pos'][:]
-    jt_chrm = IN_GT['chrms'][:].view(sp.chararray).decode('utf-8')
-    jt_strand = IN_GT['strand'][:].view(sp.chararray).decode('utf-8')
+    jt_chrm = IN_GT['chrms'][:].view(np.chararray).decode('utf-8')
+    jt_strand = IN_GT['strand'][:].view(np.chararray).decode('utf-8')
     junc_out = gzip.open('%s%s_neojunctions.tsv.gz' % (outbase, pickle_tag), 'w')
     for i in range(junc_used.shape[1]):
         strain = re.sub(r'.aligned', '', strains_tcga[i])
-        iidx = sp.where(junc_used[:, i])[0]
+        iidx = np.where(junc_used[:, i])[0]
         for ii in iidx:
             if len(gid_names_tcga.shape) > 1:
                 gname = gid_names_tcga[k_idx[ii], 0]

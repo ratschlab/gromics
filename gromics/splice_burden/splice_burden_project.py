@@ -130,7 +130,11 @@ def main():
 
     ### generate empty edge object
     print('creating empty output set')
-    out_edges = sp.zeros((IN_TC['edges'].shape[0], IN_GT['strains'].shape[0]), dtype='int')
+    if 'samples' in IN_GT:   ### legacy setting
+        out_edges = sp.zeros((IN_TC['edges'].shape[0], IN_GT['samples'].shape[0]), dtype='int')
+    else:
+        out_edges = sp.zeros((IN_TC['edges'].shape[0], IN_GT['strains'].shape[0]), dtype='int')
+        
     ### fill in values iterating over chromosomes
     for key in IN_GT.keys():
         if not key.startswith('junctions_'):
@@ -152,7 +156,10 @@ def main():
 
     OUT.create_dataset(name='pos', data=sp.array(positions), compression='gzip')
     OUT.create_dataset(name='edges_outgroup', data=out_edges, compression='gzip')
-    OUT.create_dataset(name='strains_outgroup', data=IN_GT['strains'][:], compression='gzip')
+    if 'samples' in IN_GT: ### legacy setting
+        OUT.create_dataset(name='strains_outgroup', data=IN_GT['samples'][:], compression='gzip')
+    else:
+        OUT.create_dataset(name='strains_outgroup', data=IN_GT['strains'][:], compression='gzip')
     OUT.close()
     IN_TC.close()
     IN_GT.close()

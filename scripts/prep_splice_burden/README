@@ -1,0 +1,11 @@
+Build a junction database 
+
+step 1 - collect all junctions across all hdf5 files to establish a joint coordinate system
+collect_junction_db_step1_coordinates.py
+
+step 2 - project the individual count files into the joint coordinate system
+collect_junction_db_step2_project_counts.py
+
+step 3 - gather the projected counts into a joint count file
+collect_junction_db_step3_gather.py
+

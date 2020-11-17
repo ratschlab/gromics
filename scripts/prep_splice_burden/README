@@ -1,4 +1,5 @@
-Build a junction database 
+Build a junction database for an outgroup cohort 
+================================================
 
 step 1 - collect all junctions across all hdf5 files to establish a joint coordinate system
 collect_junction_db_step1_coordinates.py
@@ -9,3 +10,7 @@ collect_junction_db_step2_project_counts.py
 step 3 - gather the projected counts into a joint count file
 collect_junction_db_step3_gather.py
 
+
+Extract junctions from a given gtf file
+======================================
+gen_junction_overview_from_gtf.py

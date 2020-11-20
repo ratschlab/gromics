@@ -48,7 +48,8 @@ setup(
         'scripts/hypoxia/tupro_pipeline_hypoxia.R',
         'scripts/hypoxia/hypoxia_plots.r',
         'scripts/tcga_boxplot/variant_expression_context.TCGA.list_of_genes.R',
-        'scripts/tcga_boxplot/parse_rna_tcga_pat_data.r'
+        'scripts/tcga_boxplot/parse_rna_tcga_pat_data.r',
+        'scripts/tcga_boxplot/quartile_norm.pl'
     ],
     install_requires=requirements,
     license="MIT license",

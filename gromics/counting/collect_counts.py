@@ -1,6 +1,6 @@
 import sys
 import os
-import scipy as sp
+import numpy as np
 import glob 
 import pdb
 import gzip
@@ -36,7 +36,7 @@ def main():
     if options.infiles_fnames != '-':
         files = options.infiles_fnames
     elif options.infiles_flist != '-':
-        files = sp.loadtxt(options.infiles_flist, dtype='str', delimiter='\t')
+        files = np.loadtxt(options.infiles_flist, dtype='str', delimiter='\t')
     elif options.infiles_fpattern != '-':
         files = glob.glob(options.infiles_fpattern)
     else:
@@ -51,19 +51,19 @@ def main():
     for f, fname in enumerate(files):
         if options.verbose:
             print('(%i / %i) Loading %s' % (f + 1, len(files), fname), file=sys.stderr)
-        data = sp.loadtxt(fname, dtype='str', delimiter='\t')
+        data = np.loadtxt(fname, dtype='str', delimiter='\t')
 
         #sid = re.sub(r'.tsv$', '', fname.split('/')[-1])
         assert data[0, 0] == 'gene_id', 'ERROR: data has no header!'
         sid = data[0, 1]
 
         if f == 0:
-            OUT.create_dataset('sids', data=sp.array([sid]).view(sp.chararray).encode('utf-8'), dtype='|S128', chunks=True, compression='gzip', maxshape=(None,))
-            OUT.create_dataset('gids', data=data[1:, 0].view(sp.chararray).encode('utf-8'))
-            OUT.create_dataset('counts', data=data[1:, 1][:, sp.newaxis].astype('int'), chunks=True, compression='gzip', maxshape=(data.shape[0], None))
+            OUT.create_dataset('sids', data=np.array([sid]).view(np.chararray).encode('utf-8'), dtype='|S128', chunks=True, compression='gzip', maxshape=(None,))
+            OUT.create_dataset('gids', data=data[1:, 0].view(np.chararray).encode('utf-8'))
+            OUT.create_dataset('counts', data=data[1:, 1][:, np.newaxis].astype('int'), chunks=True, compression='gzip', maxshape=(data.shape[0], None))
         else:
-            assert(sp.all(OUT['gids'][:].view(sp.chararray).decode('utf-8') == data[1:, 0]))
-            hdf5.append(OUT, sp.array([sid], dtype='|S128'), 'sids')
+            assert(np.all(OUT['gids'][:].view(np.chararray).decode('utf-8') == data[1:, 0]))
+            hdf5.append(OUT, np.array([sid], dtype='|S128'), 'sids')
             hdf5.append(OUT, data[1:, 1].astype('int'), 'counts')
         del data
     OUT.close()

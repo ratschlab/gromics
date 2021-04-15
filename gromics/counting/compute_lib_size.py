@@ -1,5 +1,5 @@
 import sys
-import scipy as sp
+import numpy as np
 import h5py
 import os
 import re
@@ -31,17 +31,17 @@ def main():
     if options.infile.lower().endswith('hdf5'):
         IN = h5py.File(options.infile, 'r')
         expression = IN['counts'][:]
-        genes = IN['gids'][:].view(sp.chararray).decode('utf-8')
-        strains = IN['sids'][:].view(sp.chararray).decode('utf-8')
+        genes = IN['gids'][:].view(np.chararray).decode('utf-8')
+        strains = IN['sids'][:].view(np.chararray).decode('utf-8')
         IN.close()
     elif options.infile.lower().endswith('tsv'):
-        expression = sp.loadtxt(options.infile, dtype='str', delimiter='\t')
+        expression = np.loadtxt(options.infile, dtype='str', delimiter='\t')
         strains = expression[0, 1:]
         expression = expression[1:, :]
         genes = expression[:, 0]
         expression = expression[:, 1:].astype('int')
         if len(expression.shape) < 2:
-            expression = expression[:, sp.newaxis]
+            expression = expression[:, np.newaxis]
     else:
         sys.stderr.write('ERROR: Unrecognized file ending. Able to accept *.hdf5 and *.tsv\n')
         return 1
@@ -68,16 +68,16 @@ def main():
                     continue
             if not options.coding or is_coding:
                 coding.append([sl[0], gene])
-        coding = sp.array(coding)        
+        coding = np.array(coding)        
 
         ### filter for autosomes
         if len(options.autosomes) > 0:
-            k_idx = sp.where(~sp.in1d(coding[:, 0], options.autosomes))[0]
+            k_idx = np.where(~np.in1d(coding[:, 0], options.autosomes))[0]
             coding = coding[k_idx, :]
         coding = coding[:, 1]
 
         ### filter expression
-        k_idx = sp.where(sp.in1d(genes, coding))[0]
+        k_idx = np.where(np.in1d(genes, coding))[0]
         genes = genes[k_idx]
         expression = expression[k_idx, :]
 
@@ -85,7 +85,7 @@ def main():
     libsize_uq = libsize.upper_quartile(expression)
     libsize_tc = libsize.total_count(expression)
 
-    s_idx = sp.argsort(libsize_uq)[::-1]
+    s_idx = np.argsort(libsize_uq)[::-1]
 
     out = open(re.sub('.hdf5$', '', options.infile) + '.libsize.tsv', 'w')
     print('sample\tlibsize_75percent\tlibsize_total_count', file=out)

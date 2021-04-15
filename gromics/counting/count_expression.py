@@ -3,7 +3,7 @@ import pdb
 import pysam
 import time
 import re
-import scipy as sp
+import numpy as np
 import h5py
 import pickle
 import os
@@ -53,17 +53,17 @@ def compress_g(g, idx2gene):
             g_.append(gg)
             seen += idx2gene[gg]
     
-    return sp.array(g_)
+    return np.array(g_)
 
 def valid_after_filter(filtermap, filtertype, positions):
     """Description"""
 
     if filtertype == 'all':
-        return not sp.all(filtermap[:, positions])
+        return not np.all(filtermap[:, positions])
     elif filtertype == 'start':
         return not filtermap[:, positions[0]]
     elif filtertype == 'any':
-        return not sp.any(filtermap[:, positions])
+        return not np.any(filtermap[:, positions])
     else:
         return False
 
@@ -248,11 +248,11 @@ def main():
                         pos += o[1]
 
                 try:
-                    g = sp.unique(anno[chrm][read_pos])    
+                    g = np.unique(anno[chrm][read_pos])    
                 except IndexError:
                     try:
                         read_pos = read_pos[(read_pos >= 0) & (read_pos < anno[chrm].shape[0])]
-                        g = sp.unique(anno[chrm][read_pos])    
+                        g = np.unique(anno[chrm][read_pos])    
                     except:
                         continue
 
@@ -268,7 +268,7 @@ def main():
 
                 ### get validity for each filter
                 if len(filter_names) > 0:
-                    is_valid = sp.ones((len(filter_names), ), dtype = 'bool')
+                    is_valid = np.ones((len(filter_names), ), dtype = 'bool')
                     for idx, fn in enumerate(filter_names):
                         try:
                             is_valid[idx] = valid_after_filter(filters[idx][chrm], filter_types[idx], read_pos)
@@ -276,7 +276,7 @@ def main():
                             continue
                     ### generate filter combination counts
                     for idx, comb in enumerate(filter_combs):
-                        if sp.all(is_valid[comb]):
+                        if np.all(is_valid[comb]):
                             tmp_count[idx + 1].extend(g)
             else:
                 sl = line.strip().split('\t')

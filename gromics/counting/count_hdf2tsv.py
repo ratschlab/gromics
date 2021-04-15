@@ -1,6 +1,6 @@
 import sys
 import os
-import scipy as sp
+import numpy as np
 import glob 
 import pdb
 import gzip
@@ -34,16 +34,16 @@ def main():
     cs = IN['counts'].chunks[0] 
 
     with open(options.outfile, 'w') as OUT:
-        genes = IN['gids'][:].view(sp.chararray).decode('utf-8')
-        sids = IN['sids'][:].view(sp.chararray).decode('utf-8')
+        genes = IN['gids'][:].view(np.chararray).decode('utf-8')
+        sids = IN['sids'][:].view(np.chararray).decode('utf-8')
 
-        header = sp.r_[['gene_id'], sids]
+        header = np.r_[['gene_id'], sids]
         OUT.write('\t'.join(header) + '\n') 
         for c in range(0, genes.shape[0], cs):
             curr_count = IN['counts'][c:min(c+cs, genes.shape[0]), :].astype('str')
             _out_str = []
             for cc in range(c, min(c+cs, genes.shape[0])):
-                _out_str.append('\t'.join(sp.r_[[genes[cc]], curr_count[cc-c, :]]))
+                _out_str.append('\t'.join(np.r_[[genes[cc]], curr_count[cc-c, :]]))
             OUT.write('\n'.join(_out_str) + '\n')
     IN.close()
             

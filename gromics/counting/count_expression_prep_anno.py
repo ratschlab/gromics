@@ -1,4 +1,4 @@
-import scipy as sp
+import numpy as np
 import sys
 import time
 import h5py
@@ -90,7 +90,7 @@ def parse_anno(options, format='gff'):
     for c in contigs:
         if options.verbose:
             print('reserving memory for contig %s of len %s' % (c, contigs[c]), file=sys.stderr)
-        anno[c] = sp.zeros((contigs[c] + 1,), dtype = 'int32')
+        anno[c] = np.zeros((contigs[c] + 1,), dtype = 'int32')
 
     ### init list of  considered GFF fields
     fields = options.fields.split(',')
@@ -165,7 +165,7 @@ def parse_anno(options, format='gff'):
                 exons[chrm][trans_id] = [[start, stop]]
 
         ### check, if there is already a different gene ID present, form a combination ID
-        if sp.any(anno[chrm][start:stop] > 0):
+        if np.any(anno[chrm][start:stop] > 0):
             for p in range(start, stop):
                 if anno[chrm][p] == 0:
                     new_set = tuple([gene_id])
@@ -179,7 +179,7 @@ def parse_anno(options, format='gff'):
                     idx2gene[gene_counter] = new_set
                     gene_counter += 1
         else:
-            anno[chrm][start:stop] = sp.array([gene2idx[tuple([gene_id])]] * (stop - start), dtype = 'int32')
+            anno[chrm][start:stop] = np.array([gene2idx[tuple([gene_id])]] * (stop - start), dtype = 'int32')
     if options.verbose:
         print("... done", file=sys.stderr)
 
@@ -191,7 +191,7 @@ def parse_anno(options, format='gff'):
             print('\nMasking positions due to gene overlap:', file=sys.stderr)
         for c in anno:
             masked_pos = 0
-            p_idx = sp.where(anno[c] > 1)[0]
+            p_idx = np.where(anno[c] > 1)[0]
             pos = p_idx.shape[0]
             #print >> sys.stderr, 'found %i positions' % p_idx.shape[0]
             for p in p_idx:
@@ -216,12 +216,12 @@ def parse_anno(options, format='gff'):
                 if len(exons[c][t]) < 2:
                     continue
                 ### pre-process exon (sort by start)
-                tmp = sp.array(exons[c][t], dtype='int')
-                s_idx = sp.argsort(tmp[:, 0])
+                tmp = np.array(exons[c][t], dtype='int')
+                s_idx = np.argsort(tmp[:, 0])
                 tmp = tmp[s_idx, :]
                 ### mask positions that are intronic and exonic
                 for e in range(1, tmp.shape[0]):
-                    p_idx = sp.where(anno[c][tmp[e - 1, 1]:tmp[e, 0]] > 1)[0]
+                    p_idx = np.where(anno[c][tmp[e - 1, 1]:tmp[e, 0]] > 1)[0]
                         
                     if p_idx.shape[0] > 0:
                         anno[c][p_idx + tmp[e - 1, 1]] = 1

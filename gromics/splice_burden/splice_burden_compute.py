@@ -117,8 +117,8 @@ def main():
             genecounts_gtex[i, :] = np.sum(tmp[f_idx[i] - curr_batch[0]:l_idx[i] - curr_batch[0], :], axis=0)
         print('computing size factors for normalization')
         sf_gtex = spst.scoreatpercentile(genecounts_gtex, 75, axis=0)
+        sf_gtex[sf_gtex == 0] = 1
         sf_gtex = np.median(sf_gtex) / sf_gtex
-        sf_gtex[np.isnan(sf_gtex) | np.isinf(sf_gtex)] = 1
         del genecounts_gtex
         del tmp
 

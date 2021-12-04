@@ -1,6 +1,6 @@
 import sys
 import os
-import scipy as sp
+import numpy as np
 import h5py
 import pickle
 import re
@@ -52,7 +52,7 @@ def main():
         ### get index pair of segments
         if genes[gidx].segmentgraph.segments.size == 0:
             genes[gidx].segmentgraph = csegmentgraph.Segmentgraph(genes[gidx])
-        a,b = sp.unravel_index(eidx, genes[gidx].segmentgraph.seg_edges.shape)
+        a,b = np.unravel_index(eidx, genes[gidx].segmentgraph.seg_edges.shape)
         
         ### get INTRON coordinates
         start = genes[gidx].segmentgraph.segments[1, a]
@@ -80,7 +80,7 @@ def main():
     print('loading sample count data from %s' % spladder_count)
     IN_TC = h5py.File(spladder_count, 'r')
     gene_ids_edges_spladder = IN_TC['gene_ids_edges'][:, 0]
-    assert sp.all(gene_ids_edges_spladder == sp.sort(gene_ids_edges_spladder))
+    assert np.all(gene_ids_edges_spladder == np.sort(gene_ids_edges_spladder))
     edge_index_spladder = IN_TC['edge_idx'][:].astype('int')
 
     ### load spladder event data
@@ -100,8 +100,8 @@ def main():
     OUT.create_dataset(name='gene_ids', data=gene_ids_edges_spladder, compression='gzip')
     OUT.create_dataset(name='gene_names', data=IN_TC['gene_names'][:], compression='gzip')
     OUT.create_dataset(name='strains', data=IN_TC['strains'][:], compression='gzip')
-    OUT.create_dataset(name='strand', data=sp.array([genes[_].strand for _ in gene_ids_edges_spladder]).view(sp.chararray).encode('utf-8'), compression='gzip')
-    OUT.create_dataset(name='chrms', data=sp.array([genes[_].chr for _ in gene_ids_edges_spladder]).view(sp.chararray).encode('utf-8'), compression='gzip')
+    OUT.create_dataset(name='strand', data=np.array([genes[_].strand for _ in gene_ids_edges_spladder]).view(np.chararray).encode('utf-8'), compression='gzip')
+    OUT.create_dataset(name='chrms', data=np.array([genes[_].chr for _ in gene_ids_edges_spladder]).view(np.chararray).encode('utf-8'), compression='gzip')
 
     ### compute projection
     print('computing coordinate projection')
@@ -131,9 +131,9 @@ def main():
     ### generate empty edge object
     print('creating empty output set')
     if 'samples' in IN_GT:   ### legacy setting
-        out_edges = sp.zeros((IN_TC['edges'].shape[0], IN_GT['samples'].shape[0]), dtype='int')
+        out_edges = np.zeros((IN_TC['edges'].shape[0], IN_GT['samples'].shape[0]), dtype='int')
     else:
-        out_edges = sp.zeros((IN_TC['edges'].shape[0], IN_GT['strains'].shape[0]), dtype='int')
+        out_edges = np.zeros((IN_TC['edges'].shape[0], IN_GT['strains'].shape[0]), dtype='int')
         
     ### fill in values iterating over chromosomes
     for key in IN_GT.keys():
@@ -154,7 +154,7 @@ def main():
                 for k in project_dict[pkey][i+j]:
                     out_edges[k, :] = tmp[j, :]
 
-    OUT.create_dataset(name='pos', data=sp.array(positions), compression='gzip')
+    OUT.create_dataset(name='pos', data=np.array(positions), compression='gzip')
     OUT.create_dataset(name='edges_outgroup', data=out_edges, compression='gzip')
     if 'samples' in IN_GT: ### legacy setting
         OUT.create_dataset(name='strains_outgroup', data=IN_GT['samples'][:], compression='gzip')

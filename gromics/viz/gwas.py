@@ -6,7 +6,7 @@ import matplotlib
 matplotlib.use('AGG')
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
-import scipy as sp
+import numpy as np
 import scipy.stats as spst
 import math
 
@@ -33,16 +33,16 @@ def _scalePosition(pos, chr_lens=None, N_chrm=0):
 
     offset    = 0
     if N_chrm == 0:
-        N_chrm    = max(sp.unique(pos[:,0]))#.shape[0]
-    scaledPos = sp.zeros(pos.shape[0])
-    xTickPos  = sp.zeros(N_chrm)
+        N_chrm    = max(np.unique(pos[:,0]))#.shape[0]
+    scaledPos = np.zeros(pos.shape[0])
+    xTickPos  = np.zeros(N_chrm)
 
     chr_offsets = None
     if chr_lens is not None:
         chr_offsets = _get_chrm_offsets(chr_lens)
 
-    for i,iChrm in enumerate(range(1,int(N_chrm)+1)):#sp.unique(pos[:,0])):
-#    for i, iChrm in enumerate(sp.unique(pos[:,0])):
+    for i,iChrm in enumerate(range(1,int(N_chrm)+1)):#np.unique(pos[:,0])):
+#    for i, iChrm in enumerate(np.unique(pos[:,0])):
         #Get local stuff
 
 
@@ -75,19 +75,19 @@ def makeManhattanPlot(pv, pos, fn=None, qv=None, ax=None, gnPos=None, mutGene=No
     """
 
     ### check input consistency
-    if sp.sum(pv == 0) > 0:
+    if np.sum(pv == 0) > 0:
         print('WARNING: Replacing p-Values with value 0 by 1!', file=sys.stderr)
         pv[pv==0] = 1
-    if sp.sum(sp.isnan(pv)) > 0:
+    if np.sum(np.isnan(pv)) > 0:
         print('WARNING: Replacing p-Values with value NaN by 1!', file=sys.stderr)
-        pv[sp.isnan(pv)] = 1
+        pv[np.isnan(pv)] = 1
 
     ### compute FDR and number of contigs
     if qv is None:
         qv = fdr.qvalues(pv)
     else:
         assert(qv.shape[0] == pv.shape[0])
-    Nchrm = max(sp.unique(pos[:, 0]))#.shape[0]
+    Nchrm = max(np.unique(pos[:, 0]))#.shape[0]
     ### init variables
     scaledPos, xTickPos = _scalePosition(pos)
 
@@ -96,7 +96,7 @@ def makeManhattanPlot(pv, pos, fn=None, qv=None, ax=None, gnPos=None, mutGene=No
         plt.figure(figsize = [20,5])
         ax = plt.subplot(111)
     ax.set_xlim(min(scaledPos), max(scaledPos))
-    ax.set_ylim(0, max(max(-sp.log10(pv)), 10) + 1)
+    ax.set_ylim(0, max(max(-np.log10(pv)), 10) + 1)
     ax.set_xlabel("Genomic Location")
     ax.set_ylabel("-log10(p-value)")
     if mutGene is not None:
@@ -104,20 +104,20 @@ def makeManhattanPlot(pv, pos, fn=None, qv=None, ax=None, gnPos=None, mutGene=No
     ax.set_xticks(xTickPos)
     xtlab = ["Chr %i" %(x + 1) for x in range(Nchrm)]
     ax.set_xticklabels(xtlab, rotation=45)
-    bnfThres = -sp.log10(0.05 / pv.shape[0])
+    bnfThres = -np.log10(0.05 / pv.shape[0])
     colChr   = pos[:,0] % 2
  
-    if sp.sum(qv <= 0.05) != 0:
+    if np.sum(qv <= 0.05) != 0:
         #TODO: Make COlor dependent on Cancer Gene, TF or SF
-        plt.plot(scaledPos[qv<=0.05], -sp.log10(pv[qv<=0.05]), 'o', color='red')
-    plt.scatter(scaledPos[qv>0.05], -sp.log10(pv[qv>0.05]), c=colChr[qv>0.05], edgecolors='none')
+        plt.plot(scaledPos[qv<=0.05], -np.log10(pv[qv<=0.05]), 'o', color='red')
+    plt.scatter(scaledPos[qv>0.05], -np.log10(pv[qv>0.05]), c=colChr[qv>0.05], edgecolors='none')
     plt.plot([min(scaledPos), max(scaledPos)], [bnfThres, bnfThres], '--', linewidth=2, alpha=0.6)
 
     if gnPos is not None:
         iGnChr   = gnPos[0] == pos[:,0]
         iGnPosLB = gnPos[1] <= pos[:,1]
         iGnPosUB = gnPos[2] >= pos[:,1]
-        if sp.sum(iGnChr & iGnPosLB & iGnPosUB) != 0:
+        if np.sum(iGnChr & iGnPosLB & iGnPosUB) != 0:
             gnStart  = scaledPos[iGnChr & iGnPosLB & iGnPosUB].min()
             gnEnd    = scaledPos[iGnChr & iGnPosLB & iGnPosUB].max()
             (y1, y2) = ax.get_ylim()
@@ -136,16 +136,16 @@ def makeManhattanPlot2D(pv, pos_gt, pos_pt, fn=None, ax=None, thresh=None, chrm_
     """
 
     ### check input consistency
-    if sp.sum(pv.ravel() == 0) > 0:
+    if np.sum(pv.ravel() == 0) > 0:
         print('WARNING: Replacing p-Values with value 0 by 1!', file=sys.stderr)
         pv[pv==0] = 1
-    if sp.sum(sp.isnan(pv.ravel())) > 0:
+    if np.sum(np.isnan(pv.ravel())) > 0:
         print('WARNING: Replacing p-Values with value NaN by 1!', file=sys.stderr)
-        pv[sp.isnan(pv)] = 1
+        pv[np.isnan(pv)] = 1
 
     ### init variables
-    Nchrm_gt = max(sp.unique(pos_gt[:, 0]))#.shape[0]# sp.unique(pos_gt[:,0]).shape[0]#
-    Nchrm_pt = max(sp.unique(pos_gt[:,0]))#.shape[0]#max(sp.unique(pos_pt[:, 0]))#.shape[0]
+    Nchrm_gt = max(np.unique(pos_gt[:, 0]))#.shape[0]# np.unique(pos_gt[:,0]).shape[0]#
+    Nchrm_pt = max(np.unique(pos_gt[:,0]))#.shape[0]#max(np.unique(pos_pt[:, 0]))#.shape[0]
     
     scaledPos_gt, TickPos_gt = _scalePosition(pos_gt, chrm_lens, N_chrm=22)
     scaledPos_pt, TickPos_pt = _scalePosition(pos_pt, chrm_lens, N_chrm=22)
@@ -177,9 +177,9 @@ def makeManhattanPlot2D(pv, pos_gt, pos_pt, fn=None, ax=None, thresh=None, chrm_
             ax.add_patch(Rectangle((chrm_offsets[s_keys[k-1]], 0), chrm_offsets[s_keys[k]] - chrm_offsets[s_keys[k-1]], ax.get_ylim()[1], color='grey', alpha=0.1))
             ax.add_patch(Rectangle((0, chrm_offsets[s_keys[k-1]]), ax.get_xlim()[1], chrm_offsets[s_keys[k]] - chrm_offsets[s_keys[k-1]], color='grey', alpha=0.1))
     if thresh is not None:
-        k_idx = sp.where(pv <= thresh)[0]
+        k_idx = np.where(pv <= thresh)[0]
     else:
-        k_idx = sp.arange(pv.shape[0])
+        k_idx = np.arange(pv.shape[0])
 
     if label is not None:
         if tag is None:
@@ -189,7 +189,7 @@ def makeManhattanPlot2D(pv, pos_gt, pos_pt, fn=None, ax=None, thresh=None, chrm_
             h = ax.plot(scaledPos_gt[k_idx], scaledPos_pt[k_idx], 'o', color=marker_color, alpha=0.5)
         else:
             h = []
-            for x in sp.unique(tag):
+            for x in np.unique(tag):
                 th, = ax.plot(scaledPos_gt[k_idx][tag[k_idx] == x], scaledPos_pt[k_idx][tag[k_idx] == x], 'o', alpha=0.2, label = x, markeredgecolor = 'none')
                 h.append(th)
 
@@ -212,10 +212,10 @@ def simpleManhattan(l_pVal, l_pos, ax=None, fn=None, test=False, frm='pdf'):
     if fn is not None and not fn.endswith(frm):
         fn = '%s.%s' % (fn, frm)
     
-    l_pos = sp.array(l_pos, dtype = 'int')
+    l_pos = np.array(l_pos, dtype = 'int')
     col = l_pos[:,0] / float(l_pos[:, 0].max())
  
-    allChrm = sp.unique(l_pos[:, 0])
+    allChrm = np.unique(l_pos[:, 0])
     l_pVal = [-math.log10(float(x)) for x in l_pVal]
     bfr = -math.log10(0.05 / len(l_pos))
     
@@ -246,7 +246,7 @@ def evenSimplerManhattan(pv, pos, ax=None, fn=None):
         fig = matplotlib.pyplot.figure()
         ax = fig.add_subplot(111)
 
-    ax.plot(pos,-sp.log10(pv),'.')[0]
+    ax.plot(pos,-np.log10(pv),'.')[0]
 
     if fn is not None:
         plt.savefic(fn, format='pdf')
@@ -268,14 +268,14 @@ def qq_plot(pvals, ax=None, title=None, frm='png', res=150, fname=None, logscale
     if title is not None:
         ax.set_title(title)
 
-    exp = sp.linspace(0, 1, num=pvals.shape[0] + 1)[1:]
+    exp = np.linspace(0, 1, num=pvals.shape[0] + 1)[1:]
 
     if logscale:
-        ax.plot(-sp.log10(exp), -sp.log10(sp.sort(pvals)), 'b.') 
+        ax.plot(-np.log10(exp), -np.log10(np.sort(pvals)), 'b.') 
         ax.set_ylabel("Observed (-log10)")
         ax.set_xlabel("Expected (-log10)")
     else:
-        ax.plot(exp, sp.sort(pvals)) 
+        ax.plot(exp, np.sort(pvals)) 
         ax.set_ylabel("Observed")
         ax.set_xlabel("Expected")
     ax.plot([0, ax.get_xlim()[1]], [0, ax.get_xlim()[1]], 'g-')

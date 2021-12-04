@@ -28,6 +28,7 @@ def parse_options(argv):
     optional.add_option('-m', '--mask_gene_overlap', dest='mask_gene_overlap', action='store_true', help='mask genomic positions that are annotated with different genes [off]', default=False)
     optional.add_option('-M', '--mask_alternative_overlap', dest='mask_alternative_overlap', action='store_true', help='mask genomic positions that are annotated with both intronic and exonic positions [off]', default=False)
     optional.add_option('-b', '--bam_force', dest='bam_force', action='store_true', help='force BAM as input even if file ending is different from .bam - does not work for STDIN', default=False)
+    optional.add_option('--reference', dest='reference', metavar='FILE', help='path to reference genome used for CRAM input compression []', default=None)
     optional.add_option('-B', '--best_only', dest='best_only', action='store_true', help='count only the best alignment per read [off]', default=False)
     optional.add_option('-v', '--verbose', dest='verbose', action='store_true', help='verbosity', default=False)
     parser.add_option_group(required)
@@ -176,8 +177,12 @@ def main():
         ### open file stream
         if fname == '-':
             infile = sys.stdin
-        elif (len(fname) > 3 and fname[-3:] == 'bam') or options.bam_force:
-            infile = pysam.Samfile(fname, 'rb')
+        elif (len(fname) > 3 and fname[-3:].lower() == 'bam') or options.bam_force:
+            infile = pysam.AlignmentFile(fname, 'rb')
+            options.is_bam = True
+        elif (len(fname) > 4 and fname[-4:].lower() == 'cram'):
+            assert options.reference, 'Error: input seems to be in CRAM format, but no reference sequence (via --reference) is provided.'
+            infile = pysam.AlignmentFile(fname, 'rc', reference_filename=options.reference)
             options.is_bam = True
         else:
             infile = open(fname, 'r')

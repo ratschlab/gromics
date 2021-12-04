@@ -1,6 +1,6 @@
 """This libray contains a collection of useful plot functions regarding coverage."""
 
-import scipy as sp
+import numpy as np
 import numpy.random as npr
 import pysam
 import sys
@@ -14,7 +14,7 @@ from .highlight import *
 
 def _get_read_num(files, verbose=False):
     #init read_num
-    read_num = sp.zeros((len(files)))
+    read_num = np.zeros((len(files)))
     for f_i, fn in enumerate(files):
         if verbose:
             print("Getting read number for bam %i of %i" % (f_i +1, len(files)), file=sys.stdout)
@@ -43,12 +43,12 @@ def _get_counts(chr_name, start, stop, files, intron_cov, intron_cnt=False, verb
 
     ### init counts
     if collapsed:
-        counts = sp.zeros((len(files), ), dtype='uint32')
-        intron_counts = sp.zeros((len(files), ), dtype='uint32')
+        counts = np.zeros((len(files), ), dtype='uint32')
+        intron_counts = np.zeros((len(files), ), dtype='uint32')
         intron_list = dict()
     else:
-        counts = sp.zeros((len(files), stop - start + 1), dtype='uint32')
-        intron_counts = sp.zeros((len(files), stop - start + 1), dtype='uint32')
+        counts = np.zeros((len(files), stop - start + 1), dtype='uint32')
+        intron_counts = np.zeros((len(files), stop - start + 1), dtype='uint32')
         intron_list = [dict() for i in range(len(files))]
 
     for f_i, fn in enumerate(files):
@@ -100,8 +100,8 @@ def _get_counts(chr_name, start, stop, files, intron_cov, intron_cnt=False, verb
                     pos += o[1]
     
    # if collapsed:
-   #     counts = sp.sum(counts, axis=0)
-   #     intron_counts = sp.sum(intron_counts, axis=0)
+   #     counts = np.sum(counts, axis=0)
+   #     intron_counts = np.sum(intron_counts, axis=0)
    #     if intron_cnt:
    #         for f in range(1, len(files)):
    #             for intron in intron_list[f]:
@@ -122,7 +122,7 @@ def heatmap_from_bam(chrm, start, stop, files, subsample = 0, verbose = False,
 
     ### subsampling
     if subsample > 0 and len(files) > subsample:
-        files = sp.array(files)
+        files = np.array(files)
         files = npr.choice(files, subsample)
 
     ### augment chromosome name
@@ -144,7 +144,7 @@ def heatmap_from_bam(chrm, start, stop, files, subsample = 0, verbose = False,
         data = data[:, col_idx]
     
     if log:
-        data = sp.log10(data + 1)
+        data = np.log10(data + 1)
 
     if cmap is not None:
         ax.matshow(data, cmap=cmap, aspect='auto')
@@ -168,7 +168,7 @@ def cov_from_bam(chrm, start, stop, files, subsample = 0, verbose = False,
     ### subsampling
     if subsample > 0 and len(files) > subsample:
         npr.seed(23)
-        files = sp.array(files)
+        files = np.array(files)
         files = npr.choice(files, subsample)
 
     ### augment chromosome name
@@ -205,32 +205,32 @@ def cov_from_bam(chrm, start, stop, files, subsample = 0, verbose = False,
         bin_counts = counts
         bin_intron_counts = intron_counts
         if col_idx is not None:
-            counts_x = sp.arange(col_idx.shape[0])
+            counts_x = np.arange(col_idx.shape[0])
         else:
             counts_x = list(range(start, stop + 1))
     else:
         if verbose:
             print('... binning counts ...', file=sys.stdout)
-        bin_counts = sp.zeros((bins,))
-        bin_intron_counts = sp.zeros((bins, ))
-        binsize = int(sp.ceil(float(counts.shape[0]) / bins))
+        bin_counts = np.zeros((bins,))
+        bin_intron_counts = np.zeros((bins, ))
+        binsize = int(np.ceil(float(counts.shape[0]) / bins))
         for ii, i in enumerate(range(0, counts.shape[0], binsize)):
-            bin_counts[ii] = sp.sum(counts[i:min(i + binsize, counts.shape[0] - 1)]) / binsize
+            bin_counts[ii] = np.sum(counts[i:min(i + binsize, counts.shape[0] - 1)]) / binsize
             if intron_cov:
-                bin_intron_counts[ii] = sp.sum(intron_counts[i:min(i + binsize, intron_counts.shape[0] - 1)]) / binsize
+                bin_intron_counts[ii] = np.sum(intron_counts[i:min(i + binsize, intron_counts.shape[0] - 1)]) / binsize
         if col_idx is not None:
-            counts_x = sp.linspace(0, col_idx.shape[0], num = bins)
+            counts_x = np.linspace(0, col_idx.shape[0], num = bins)
         else:
-            counts_x = sp.linspace(start, stop, num = bins)
+            counts_x = np.linspace(start, stop, num = bins)
 
     ### use log if chosen
     if log:
-        bin_counts = sp.log10(bin_counts + 1)
-        bin_intron_counts = sp.log10(bin_intron_counts + 1)
+        bin_counts = np.log10(bin_counts + 1)
+        bin_intron_counts = np.log10(bin_intron_counts + 1)
         if intron_cnt:
             for intron in intron_list:
                 if intron_list[intron] > 0:
-                    intron_list[intron] = sp.log10(intron_list[intron] + 1)
+                    intron_list[intron] = np.log10(intron_list[intron] + 1)
 
     if ax is None:
         fig = plt.figure(figsize = (10, 4))
@@ -239,7 +239,7 @@ def cov_from_bam(chrm, start, stop, files, subsample = 0, verbose = False,
         ax.fill_between(counts_x, bin_intron_counts, facecolor=color_intron_cov, edgecolor='none', alpha=0.5)
 
     ax.fill_between(counts_x, bin_counts, facecolor=color_cov, edgecolor='none', alpha=0.5)
-    #ax.set_xticklabels([str(int(x)) for x in sp.linspace(start, stop, num = len(ax.get_xticklabels()))])
+    #ax.set_xticklabels([str(int(x)) for x in np.linspace(start, stop, num = len(ax.get_xticklabels()))])
     ax.set_xlabel('Position on contig %s' % chrm)
 
     ### draw strand
@@ -335,9 +335,9 @@ def add_intron_patch2(ax, start, stop, cnt, color='green'):
     b = float(cnt) * (-1*(x3*x3)) / z
 
     ### get points
-    #x = sp.linspace(start, stop, 100)
-    x = sp.linspace(0, stop-start, 100)
+    #x = np.linspace(start, stop, 100)
+    x = np.linspace(0, stop-start, 100)
     #y = (a*x*x) + (b*x) + c
     y = (a*x*x) + (b*x)
-    ax.plot(sp.linspace(start, stop, 100), y, '-', color=color)
+    ax.plot(np.linspace(start, stop, 100), y, '-', color=color)
 

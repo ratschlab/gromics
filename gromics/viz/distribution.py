@@ -1,4 +1,4 @@
-import scipy as sp
+import numpy as np
 from scipy.stats import gaussian_kde
 import matplotlib
 import matplotlib.pyplot as plt
@@ -13,7 +13,7 @@ def violin_plot(ax, data, pos, bp=False, fc='b'):
     i = -1
     for d,p in zip(data,pos):
         i += 1
-        d_ = d[~sp.isnan(d)]
+        d_ = d[~np.isnan(d)]
         if d_.shape[0] < 2:
             continue
         try:
@@ -22,7 +22,7 @@ def violin_plot(ax, data, pos, bp=False, fc='b'):
             continue
         m = k.dataset.min() #lower bound of violin
         M = k.dataset.max() #upper bound of violin
-        x = sp.arange(m,M,(M-m)/100.) # support for violin
+        x = np.arange(m,M,(M-m)/100.) # support for violin
         v = k.evaluate(x) #violin profile (density curve)
         v = v/v.max()*w #scaling the violin to the available space
         _fc = fc[i] if isinstance(fc, list) else fc
@@ -42,7 +42,7 @@ def box_plot(ax, data, pos, fc='b', notch=False):
     i = -1
     for d,p in zip(data,pos):
         i += 1
-        d_ = d[~sp.isnan(d)]
+        d_ = d[~np.isnan(d)]
         if d_.shape[0] < 2:
             continue
         _fc = fc[i] if isinstance(fc, list) else fc
@@ -67,15 +67,15 @@ def qq_plot(pvals, ax=None, title=None, frm='png', dpi=150, fname=None, logscale
     ax.set_ylabel("Oberserved")
     ax.set_xlabel("Expected")
 
-    exp = sp.linspace(0, 1, num=pvals.shape[0])
+    exp = np.linspace(0, 1, num=pvals.shape[0])
     if logscale and pvals.min() == 0:
         idx0 =  (pvals == 0)
         pvals[idx0] = pvals[~idx0].min() / 2
 
     if logscale:
-        ax.plot(-sp.log10(exp), -sp.log10(sp.sort(pvals)), 'bo') 
+        ax.plot(-np.log10(exp), -np.log10(np.sort(pvals)), 'bo') 
     else:
-        ax.plot(exp, sp.sort(pvals), 'bo') 
+        ax.plot(exp, np.sort(pvals), 'bo') 
     xlim = ax.get_xlim()
     ylim = ax.get_ylim()
     ml = max(xlim[1], ylim[1])
@@ -101,28 +101,28 @@ def dist_overview(data, ax=None, fname=None, format='pdf', log=False,
         ax = fig.add_subplot(111)
 
     if log:
-        llq = sp.percentile(sp.log10(data + 1), 12.5, axis=axis)
-        lq = sp.percentile(sp.log10(data + 1), 25, axis=axis)
-        me = sp.percentile(sp.log10(data + 1), 50, axis=axis)
-        uq = sp.percentile(sp.log10(data + 1), 75, axis=axis)
-        uuq = sp.percentile(sp.log10(data + 1), 87.5, axis=axis)
+        llq = np.percentile(np.log10(data + 1), 12.5, axis=axis)
+        lq = np.percentile(np.log10(data + 1), 25, axis=axis)
+        me = np.percentile(np.log10(data + 1), 50, axis=axis)
+        uq = np.percentile(np.log10(data + 1), 75, axis=axis)
+        uuq = np.percentile(np.log10(data + 1), 87.5, axis=axis)
     else:
-        llq = sp.percentile(data, 12.5, axis=axis)
-        lq = sp.percentile(data, 25, axis=axis)
-        me = sp.percentile(data, 50, axis=axis)
-        uq = sp.percentile(data, 75, axis=axis)
-        uuq = sp.percentile(data, 87.5, axis=axis)
+        llq = np.percentile(data, 12.5, axis=axis)
+        lq = np.percentile(data, 25, axis=axis)
+        me = np.percentile(data, 50, axis=axis)
+        uq = np.percentile(data, 75, axis=axis)
+        uuq = np.percentile(data, 87.5, axis=axis)
 
     if sort:
-        s_idx = sp.argsort(me)
+        s_idx = np.argsort(me)
     else:
-        s_idx = sp.arange(data.shape[axis])
+        s_idx = np.arange(data.shape[axis])
 
-    #ax.fill_between(sp.arange(data.shape[axis]), llq, uuq, facecolor='blue', edgecolor='blue', linestyle='--', alpha=0.2, interpolate=True)
-    #ax.fill_between(sp.arange(data.shape[axis]), lq, uq, facecolor='blue', edgecolor='blue', linestyle='--', alpha=0.7, interpolate=True)
-    ax.fill_between(sp.arange(data.shape[1-axis]), llq, uuq, facecolor='blue', edgecolor='none', alpha=0.2, interpolate=True)
-    ax.fill_between(sp.arange(data.shape[1-axis]), lq, uq, facecolor='blue', edgecolor='none', alpha=0.7, interpolate=True)
-    ax.plot(sp.arange(data.shape[1-axis]), me, 'r-')
+    #ax.fill_between(np.arange(data.shape[axis]), llq, uuq, facecolor='blue', edgecolor='blue', linestyle='--', alpha=0.2, interpolate=True)
+    #ax.fill_between(np.arange(data.shape[axis]), lq, uq, facecolor='blue', edgecolor='blue', linestyle='--', alpha=0.7, interpolate=True)
+    ax.fill_between(np.arange(data.shape[1-axis]), llq, uuq, facecolor='blue', edgecolor='none', alpha=0.2, interpolate=True)
+    ax.fill_between(np.arange(data.shape[1-axis]), lq, uq, facecolor='blue', edgecolor='none', alpha=0.7, interpolate=True)
+    ax.plot(np.arange(data.shape[1-axis]), me, 'r-')
 
     if fname is not None:
         plt.savefig(fname, format=format)

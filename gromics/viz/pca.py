@@ -4,7 +4,7 @@ matplotlib.use('AGG')
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 #import modules.utils as utils
-import scipy as sp
+import numpy as np
 import matplotlib.markers as markers
 
 
@@ -20,15 +20,15 @@ def plotPCA(V_g, w_g, ctypes, k = 5, fn = None, fig = None, figsize = None,marke
 
     ### choose colormap and adapt normalization 
     cmap = plt.get_cmap('jet')
-    norm = plt.normalize(0, sp.unique(ctypes).shape[0])
+    norm = plt.normalize(0, np.unique(ctypes).shape[0])
     ### plot first k main axes of variation
     for k1 in range(0, k):
         cnt = 1
         for k2 in range(k1 + 1, k):
             ax = fig.add_subplot(k-1, k-1, (k1 * (k-1)) + cnt)
             cnt += 1
-            for idx, ct in enumerate(sp.unique(ctypes)):
-                c_idx = sp.where(ctypes == ct)[0]
+            for idx, ct in enumerate(np.unique(ctypes)):
+                c_idx = np.where(ctypes == ct)[0]
                 if c_idx.shape[0] > 0:
                     ax.plot(V_g[k1, c_idx], V_g[k2, c_idx], markers.MarkerStyle.filled_markers[idx % 13], color = cmap(norm(idx)), label = ct, ms = markersize, alpha=0.75)
             ax.set_title('PC %i vs %i' % (k1 + 1, k2 + 1))

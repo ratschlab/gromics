@@ -1,4 +1,4 @@
-import scipy as sp
+import numpy as np
 
 def append(f, data, name):
     
@@ -11,7 +11,7 @@ def append(f, data, name):
     elif len(tmp) == 2:
         f[name].resize((tmp[0], tmp[1] + 1))
         if len(data.shape) < 2:
-            f[name][:, tmp[1]:] = data[:, sp.newaxis]
+            f[name][:, tmp[1]:] = data[:, np.newaxis]
         else:
             f[name][:, tmp[1]:] = data
     else:

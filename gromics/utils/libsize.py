@@ -1,4 +1,4 @@
-import scipy as sp
+import numpy as np
 
 def total_count(expression):
     """
@@ -16,4 +16,4 @@ def upper_quartile(expression):
     :param expression: Expression count matrix with genes as rows and samples as columns
     :return: float upper quartile of expression per sample
     """
-    return sp.array([sp.percentile(x, 75) for x in expression.T])
+    return np.array([np.percentile(x, 75) for x in expression.T])

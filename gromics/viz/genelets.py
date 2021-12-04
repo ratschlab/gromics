@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import matplotlib
-import scipy as sp
+import numpy as np
 
 def single(exons, ax=None, x_range=None, count=1, color='blue', grid=False, label=None):
 
@@ -16,7 +16,7 @@ def single(exons, ax=None, x_range=None, count=1, color='blue', grid=False, labe
     min_ex = None
     max_ex = None
     if len(exons.shape) == 1:
-        exons = exons[sp.newaxis, :]
+        exons = exons[np.newaxis, :]
 
     for e_idx in range(exons.shape[0]):
         exon = exons[e_idx, :]

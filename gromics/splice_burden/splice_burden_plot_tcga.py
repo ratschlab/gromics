@@ -6,7 +6,7 @@ matplotlib.rcParams['axes.linewidth'] = 2
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
-import scipy as sp
+import numpy as np
 
 color_dict = {'ACC': '#C1A72F', 'DLBC': '#3953A4', 'READ': '#DAF1FC', 'GBM': '#B2509E', 'THCA': '#F9ED32', 'BLCA': '#FAD2D9', 'UCEC': '#FBE3C7', 'PCPG': '#E8C51D', 'CESC': '#F6B667', 'UCS': '#F89420', 'THYM': '#CEAC8F', 'LIHC': '#CACCDB', 'CHOL': '#104A7F', 'HNSC': '#97D1A9', 'STAD': '#00AEEF', 'SKCM': '#BBD642', 'COAD': '#9EDDF9', 'UVM': '#009444', 'LUAD': '#D3C3E0', 'TGCT': '#BE1E2D', 'LUSC': '#A084BD', 'MESO': '#542C88', 'KIRC': '#F8AFB3', 'ESCA': '#007EB5', 'SARC': '#00A99D', 'KIRP': '#EA7075', 'LGG': '#D49DC7', 'PRAD': '#7E1918', 'PAAD': '#6E7BA2', 'BRCA': '#ED2891', 'OV': '#D97D25', 'KICH': '#ED1C24'}
 log = False
@@ -18,13 +18,13 @@ def main():
         sys.exit(1)
 
     neojunctions_file = sys.argv[1]
-    neojunctions = sp.loadtxt(neojunctions_file, dtype='str', delimiter='\t')
+    neojunctions = np.loadtxt(neojunctions_file, dtype='str', delimiter='\t')
 
     tcga_neojunctions_file = sys.argv[2]
-    tcga_neojunctions = sp.loadtxt(tcga_neojunctions_file, dtype='str', delimiter='\t')
+    tcga_neojunctions = np.loadtxt(tcga_neojunctions_file, dtype='str', delimiter='\t')
 
     tcga_metadata_file = sys.argv[3]
-    tcga_metadata = sp.loadtxt(tcga_metadata_file, dtype='str', delimiter='\t')
+    tcga_metadata = np.loadtxt(tcga_metadata_file, dtype='str', delimiter='\t')
     tcga_metadata = tcga_metadata[1:, :]
 
     sample = sys.argv[4]
@@ -33,9 +33,9 @@ def main():
     ct_dict = dict([('%s.%s' % (_[2], _[4]), _[0]) for i,_ in enumerate(tcga_metadata)])
     tn_dict = dict([('%s.%s' % (_[2], _[4]), _[6] == 'False') for i,_ in enumerate(tcga_metadata)])
 
-    ctypes = sp.array([ct_dict[_] for _ in tcga_neojunctions[:, 0]])
-    ctypes_u = sp.unique(ctypes)
-    tcga_is_tumor = sp.array([tn_dict[_] for _ in tcga_neojunctions[:, 0]])
+    ctypes = np.array([ct_dict[_] for _ in tcga_neojunctions[:, 0]])
+    ctypes_u = np.unique(ctypes)
+    tcga_is_tumor = np.array([tn_dict[_] for _ in tcga_neojunctions[:, 0]])
 
     tcga_neojunctions = tcga_neojunctions[:, 1].astype('int')
 
@@ -49,23 +49,23 @@ def main():
     buffsize = 200
     sort_means = []
     for ct in ctypes_u:
-        tt_idx = sp.where((ctypes == ct) & tcga_is_tumor)[0]
-        sort_means.append(sp.mean(tcga_neojunctions[tt_idx]))
-    sort_means = sp.array(sort_means)
-    sidx = sp.argsort(sort_means)
+        tt_idx = np.where((ctypes == ct) & tcga_is_tumor)[0]
+        sort_means.append(np.mean(tcga_neojunctions[tt_idx]))
+    sort_means = np.array(sort_means)
+    sidx = np.argsort(sort_means)
 
     for t in ctypes_u[sidx]:
         # tumor
-        t_idx = sp.where(ctypes == t)[0]
+        t_idx = np.where(ctypes == t)[0]
         if t_idx.size != 0:
-            s_idx = sp.argsort(tcga_neojunctions[t_idx])
+            s_idx = np.argsort(tcga_neojunctions[t_idx])
             # tumor
-            tt_idx = sp.where(tcga_is_tumor[t_idx][s_idx])[0]
+            tt_idx = np.where(tcga_is_tumor[t_idx][s_idx])[0]
             if tt_idx.shape[0] != 0:
-                ax.plot(sp.arange(tt_idx.shape[0]) + cumx, tcga_neojunctions[t_idx[s_idx][tt_idx]],'o',  color=color_dict[t], markeredgecolor='none')
-                tn_idx = sp.where(~tcga_is_tumor[t_idx][s_idx])[0]
+                ax.plot(np.arange(tt_idx.shape[0]) + cumx, tcga_neojunctions[t_idx[s_idx][tt_idx]],'o',  color=color_dict[t], markeredgecolor='none')
+                tn_idx = np.where(~tcga_is_tumor[t_idx][s_idx])[0]
                 if tn_idx.shape[0] >= 5:
-                    tn_median = sp.median(tcga_neojunctions[t_idx[s_idx][tn_idx]])
+                    tn_median = np.median(tcga_neojunctions[t_idx[s_idx][tn_idx]])
                     ax.plot([cumx-25, t_idx.shape[0]+cumx+25], [tn_median, tn_median], ':r', linewidth=2.0)
             labels.append(t)
             xticks.append(cumx + int(t_idx.shape[0] / 2))

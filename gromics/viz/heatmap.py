@@ -1,5 +1,5 @@
 import matplotlib
-import scipy as sp
+import numpy as np
 import scipy.cluster.hierarchy as spch
 import scipy.spatial.distance as spsd
 import matplotlib.pyplot as plt
@@ -42,7 +42,7 @@ def cluster(mat, distance='euclidean', method='single', dim1=True, dim2=True):
         dendro = spch.dendrogram(lnk1, p=100000, no_plot=True, truncate_mode='mtica')
         lvs = dendro['leaves']
     else:
-        lvs = sp.arange(mat.shape[0])
+        lvs = np.arange(mat.shape[0])
         lnk1 = None
  
     if dim2 and mat.shape[0] > 1:
@@ -57,7 +57,7 @@ def cluster(mat, distance='euclidean', method='single', dim1=True, dim2=True):
         dendro = spch.dendrogram(lnk2, p=100000, no_plot=True, truncate_mode='mtica')
         lvs2 = dendro['leaves']
     else:
-        lvs2 = sp.arange(mat.shape[1])
+        lvs2 = np.arange(mat.shape[1])
         lnk2 = None
 
     return (lvs, lvs2, lnk1, lnk2)
@@ -82,7 +82,7 @@ def makeHeatmapCluster(mat, fn = None, tit = None, xlab = None, ylab = None, cma
 #        dendro = spch.dendrogram(lnk1, p=500, orientation='left', truncate_mode='mtica')
         lvs = dendro['leaves']
     else:
-        lvs = sp.arange(mat.shape[0])
+        lvs = np.arange(mat.shape[0])
         lnk1 = None
  
     if dim2 and mat.shape[0] > 1:
@@ -99,7 +99,7 @@ def makeHeatmapCluster(mat, fn = None, tit = None, xlab = None, ylab = None, cma
         #dendro = spch.dendrogram(lnk2, p=100000, orientation='top', truncate_mode='mtica')
         lvs2 = dendro['leaves']
     else:
-        lvs2 = sp.arange(mat.shape[1])
+        lvs2 = np.arange(mat.shape[1])
         lnk2 = None
 
     cax = makeHeatmap(mat, fn=fn, tit=tit, xlab=xlab, ylab=ylab, cmap=cmap, norm=norm,
@@ -121,9 +121,9 @@ def makeHeatmap(mat, fn = None, tit = None, xlab = None, ylab = None, cmap = cm.
         vmax = mat.max()
 
     if xidx is None:
-        xidx = sp.arange(mat.shape[0])
+        xidx = np.arange(mat.shape[0])
     if yidx is None:
-        yidx = sp.arange(mat.shape[1])
+        yidx = np.arange(mat.shape[1])
     
     if normalize and norm is None:
         norm = matplotlib.colors.Normalize(float(vmin)/2, float(vmax)/2) ##
@@ -164,17 +164,17 @@ def _nanDist(mat):
     NaN values in the input data. Not quite sure this works 100% ...
     """
 
-    pdist = sp.zeros((mat.shape[0], mat.shape[0]))
+    pdist = np.zeros((mat.shape[0], mat.shape[0]))
     for i in range(pdist.shape[0]):
         if i % 100 == 0:
             print('%i / %i' % (i, pdist.shape[0]))
-        a = sp.ones((pdist.shape[0] - i - 1, 1)) * mat[i, :] #, [pdist.shape[0] - i - 1, 1])
+        a = np.ones((pdist.shape[0] - i - 1, 1)) * mat[i, :] #, [pdist.shape[0] - i - 1, 1])
         b = mat[i + 1:pdist.shape[0], :]
-        idx = (~sp.isnan(a) * ~sp.isnan(b))
+        idx = (~np.isnan(a) * ~np.isnan(b))
         c = (a - b) * idx
-        pdist[i, i+1:] = sp.sum(c*c , axis = 1) / sp.sum(idx, axis = 1)
+        pdist[i, i+1:] = np.sum(c*c , axis = 1) / np.sum(idx, axis = 1)
     pdist += pdist.T
-    pdist[sp.isnan(pdist)] = sp.nanmax(pdist)
+    pdist[np.isnan(pdist)] = np.nanmax(pdist)
     return pdist
 
 
@@ -205,38 +205,38 @@ def trackPlot(mat, fig=None, groups=None, ratios=None, labels=None, cmap=None, n
     if fig is None:
         fig = plt.figure(figsize=(10, 10), dpi=200)
     if groups is None:
-        groups = sp.ones((mat.shape[0],), dtype='int')
+        groups = np.ones((mat.shape[0],), dtype='int')
     if ratios is None:
         ratios = groups
     if labels is not None:
         assert(labels.shape[0] == mat.shape[0])
     if cmap is None:
-        cmap = sp.array([plt.get_cmap('Blues')] * groups.shape[0], dtype='object')
+        cmap = np.array([plt.get_cmap('Blues')] * groups.shape[0], dtype='object')
     else:
         assert(cmap.shape[0] == groups.shape[0])
     if norm is None:
-        norm = sp.array([plt.Normalize(-1.0, 1.0)] * groups.shape[0], dtype='object')
+        norm = np.array([plt.Normalize(-1.0, 1.0)] * groups.shape[0], dtype='object')
     else:
         assert(norm.shape[0] == groups.shape[0])
 
     if is2D:
         gs = gridspec.GridSpec(groups.shape[0], groups.shape[0], height_ratios=ratios, hspace=0.05, width_ratios=ratios, wspace=0.05)
         last_col = 0
-        axes = sp.zeros((groups.shape[0], groups.shape[0]), dtype='object')
+        axes = np.zeros((groups.shape[0], groups.shape[0]), dtype='object')
         for col in range(groups.shape[0]):
             last_row = 0
             for row in range(groups.shape[0]):
                 axes[row, col] = fig.add_subplot(gs[row, col])
                 axes[row, col].imshow(mat[last_row:last_row+groups[row], :][:, last_col:last_col+groups[col]], aspect='auto', origin='upper', interpolation='nearest', cmap=cmap[row], norm=norm[row])
                 if xticks and row == 0:
-                    axes[row, col].set_xticks(sp.arange(groups[col]))
+                    axes[row, col].set_xticks(np.arange(groups[col]))
                     axes[row, col].xaxis.tick_top()
                     if labels is not None:
                         axes[row, col].set_xticklabels(labels[last_col:last_col+groups[col]], rotation=90)
                 else:
                     axes[row, col].set_xticks([])
                 if col == 0:
-                    axes[row, col].set_yticks(sp.arange(groups[row]))
+                    axes[row, col].set_yticks(np.arange(groups[row]))
                     if labels is not None:
                         axes[row, col].set_yticklabels(labels[last_row:last_row+groups[row]])
                 else:
@@ -244,17 +244,17 @@ def trackPlot(mat, fig=None, groups=None, ratios=None, labels=None, cmap=None, n
                 last_row += groups[row]
             last_col += groups[col]
     else:
-        axes = sp.zeros((groups.shape[0], ), dtype='object')
+        axes = np.zeros((groups.shape[0], ), dtype='object')
         gs = gridspec.GridSpec(groups.shape[0], 1, height_ratios=ratios, hspace=0.05)
         last_row = 0
         for row in range(groups.shape[0]):
             axes[row] = fig.add_subplot(gs[row, 0])
            # if density is not None and row in density:
-           #     ax.fill_between(sp.arange(mat.shape[1]), 
+           #     ax.fill_between(np.arange(mat.shape[1]), 
            # else:
             axes[row].imshow(mat[last_row:last_row+groups[row], :], aspect='auto', origin='lower', interpolation='nearest', cmap=cmap[row], norm=norm[row])
             axes[row].set_xticks([])
-            axes[row].set_yticks(sp.arange(groups[row]))
+            axes[row].set_yticks(np.arange(groups[row]))
             if labels is not None:
                 axes[row].set_yticklabels(labels[last_row:last_row+groups[row]])
             last_row += groups[row]

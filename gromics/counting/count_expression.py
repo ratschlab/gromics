@@ -242,6 +242,10 @@ def main():
                 pos = line.pos #- 1 is already 0 based in pysam now
                 broken = False
 
+                ### we have encountered an alignment outside of any annotation contig
+                if not chrm in anno:
+                    continue
+
                 #read_pos = line.positions --> alternative to code below
                 read_pos = []
                 for o in line.cigar:
@@ -296,6 +300,10 @@ def main():
                 chrm = sl[2]
                 pos = int(sl[3]) - 1
                 broken = False
+
+                ### we have encountered an alignment outside of any annotation contig
+                if not chrm in anno:
+                    continue
 
                 ## is unmapped ?
                 if (int(sl[1]) & 4) == 4:

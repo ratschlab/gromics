@@ -1,4 +1,4 @@
-pysam>=0.15.0
-numpy>=1.18.0
-scipy>=1.5.0
-h5py
+pysam>=0.22.0
+numpy>=1.26
+scipy>=1.13
+h5py>=2.2
